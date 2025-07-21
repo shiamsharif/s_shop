@@ -4,28 +4,28 @@ from .models import Category, Product, Rating, Cart, Order, CartItem, OrderItem
 # Register your models here.
 @admin.register(Category)
 class CategoryAdmin(admin.ModelAdmin):
-    list_display = ('name', 'slug')
-    list_filter = ('name',)
+    list_display = ['name', 'slug']
+    list_filter = ['name']
     prepopulated_fields = {'slug': ('name',)}
-    search_fields = ('name',)
-    ordering = ('name',)
+    search_fields = ['name']
+    ordering = ['name']
     show_facets = admin.ShowFacets.ALWAYS
 
 class RatingInline(admin.TabularInline):
     model = Rating
     extra = 0
-    readonly_fields = ('user', 'rating','comment' , 'created')
+    readonly_fields = ['user', 'rating', 'comment', 'created']
     #show_facets = admin.ShowFacets.ALWAYS
     
 
 @admin.register(Product)
 class ProductAdmin(admin.ModelAdmin):
-    list_display = ('name', 'category', 'price', 'stock', 'available', 'created', 'updated')
-    list_filter = ('category', 'available', 'created', 'updated')
-    list_editable = ('price', 'stock', 'available')
+    list_display = ['name', 'category', 'price', 'stock', 'available', 'created', 'updated']
+    list_filter = ['category', 'available', 'created', 'updated']
+    list_editable = ['price', 'stock', 'available']
     prepopulated_fields = {'slug': ('name',)}
-    search_fields = ('name', 'description')
-    ordering = ('-created',)
+    search_fields = ['name', 'description']
+    ordering = ['-created']
     inlines = [RatingInline]
     show_facets = admin.ShowFacets.ALWAYS
     
@@ -36,10 +36,10 @@ class CartItemInline(admin.TabularInline):
     
 @admin.register(Cart)
 class CartAdmin(admin.ModelAdmin):
-    list_display = ('user', 'created_at', 'updated_at',)
-    list_filter = ('user', 'created_at', 'updated_at')
-    search_fields = ('user__username',)
-    ordering = ('-created_at',)
+    list_display = ['user', 'created_at', 'updated_at']
+    list_filter = ['user', 'created_at', 'updated_at']
+    search_fields = ['user__username']
+    ordering = ['-created_at']
     inlines = [CartItemInline]
     show_facets = admin.ShowFacets.ALWAYS
 
@@ -50,18 +50,18 @@ class OrderItemInline(admin.TabularInline):
 
 @admin.register(Order)
 class OrderAdmin(admin.ModelAdmin):
-    list_display = ('id', 'user', 'first_name', 'last_name', 'email', 'paid', 'created_at', 'updated_at',)
-    list_filter = ('user', 'created_at', 'updated_at')
-    search_fields = ('user__username',)
-    ordering = ('-created_at',)
+    list_display = ['id', 'user', 'first_name', 'last_name', 'email', 'paid', 'created_at', 'updated_at']
+    list_filter = ['user', 'created_at', 'updated_at']
+    search_fields = ['user__username']
+    ordering = ['-created_at']
     inlines = [OrderItemInline]
     show_facets = admin.ShowFacets.ALWAYS
     
     
 @admin.register(Rating)
 class RatingAdmin(admin.ModelAdmin):
-    list_display = ('product', 'user', 'rating', 'created')
-    list_filter = ('product', 'user', 'rating', 'created')
-    search_fields = ('product__name', 'user__username')
-    ordering = ('-created',)
+    list_display = ['product', 'user', 'rating', 'created']
+    list_filter = ['product', 'user', 'rating', 'created']
+    search_fields = ['product__name', 'user__username']
+    ordering = ['-created']
     show_facets = admin.ShowFacets.ALWAYS

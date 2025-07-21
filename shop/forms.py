@@ -11,13 +11,13 @@ class RegistrationForm(UserCreationForm):
 
     class Meta:
         model = User
-        fields = ('username', 'email', 'first_name', 'last_name', 'password1', 'password2')
+        fields = ['username', 'email', 'first_name', 'last_name', 'password1', 'password2']
 
 
 class RatingForm(forms.ModelForm):
     class Meta:
         model = Rating
-        fields = ('rating' 'comment')
+        fields = ['rating', 'comment']
         widgets = {
             'rating': forms.Select(choices=[(i, i) for i in range(1, 6)]),
             'comment': forms.Textarea(attrs={'rows': 4, 'cols': 40}),
