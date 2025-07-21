@@ -42,3 +42,26 @@ class CartAdmin(admin.ModelAdmin):
     ordering = ('-created_at',)
     inlines = [CartItemInline]
     show_facets = admin.ShowFacets.ALWAYS
+
+
+class OrderItemInline(admin.TabularInline):
+    model = OrderItem
+    extra = 0
+
+@admin.register(Order)
+class OrderAdmin(admin.ModelAdmin):
+    list_display = ('id', 'user', 'first_name', 'last_name', 'email', 'paid', 'created_at', 'updated_at',)
+    list_filter = ('user', 'created_at', 'updated_at')
+    search_fields = ('user__username',)
+    ordering = ('-created_at',)
+    inlines = [OrderItemInline]
+    show_facets = admin.ShowFacets.ALWAYS
+    
+    
+@admin.register(Rating)
+class RatingAdmin(admin.ModelAdmin):
+    list_display = ('product', 'user', 'rating', 'created')
+    list_filter = ('product', 'user', 'rating', 'created')
+    search_fields = ('product__name', 'user__username')
+    ordering = ('-created',)
+    show_facets = admin.ShowFacets.ALWAYS
