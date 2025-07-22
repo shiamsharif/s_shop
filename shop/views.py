@@ -117,3 +117,63 @@ def product_detail(request, slug):
         'rating_form': rating_form,
         'user_rating': user_rating,
     })
+    
+    
+@login_required
+def cart_detail(request):
+    try:
+        cart = Cart.objects.get(user=request.user)
+    except Cart.DoesNotExist:
+        cart = Cart.objects.create(user=request.user)
+        
+    return render(request, 'shop/cart_detail.html', {'cart': cart})
+
+
+@login_required
+def cart_add(request,product_id):
+    product = get_object_or_404(Product, id=product_id)
+    
+    try:
+        cart = Cart.objects.get(user=request.user)
+    except Cart.DoesNotExist:
+        cart = Cart.objects.create(user=request.user)
+    
+    try:
+        cart_item = CartItem.objects.get(cart=cart, product=product)
+        cart_item.quantity += 1
+        cart_item.save()
+    except CartItem.DoesNotExist:
+        CartItem.objects.create(cart=cart, product=product, quantity=1)
+        
+    messages.success(request, f'{product.name} has been added to your cart.')
+    return redirect('shop:cart_detail')
+
+
+@login_required
+def cart_remove(request, product_id):
+    cart = get_object_or_404(Cart, user=request.user)
+    product = get_object_or_404(Product, id=product_id)
+    cart_item = get_object_or_404(CartItem, cart=cart, product=product)
+    cart_item.delete()
+    messages.success(request, f'{product.name} has been removed from your cart.')
+    return redirect('shop:cart_detail')
+
+
+@login_required
+def cart_update(request, product_id):
+    cart = get_object_or_404(Cart, user=request.user)
+    product = get_object_or_404(Product, id=product_id)
+    cart_item = get_object_or_404(CartItem, cart=cart, product=product)
+    
+    quentity = int(request.POST.get('quantity', 1))
+    
+    if quentity > 0:
+        cart_item.quantity = quentity
+        cart_item.save()
+        messages.success(request, f'Quantity of {product.name} has been updated.')
+    else:
+        cart_item.quantity = quentity
+        cart_item.save()
+        messages.error(request, 'Cart update successfully!')
+
+    return redirect('shop:cart_detail')
