@@ -6,6 +6,7 @@ from .forms import RegistrationForm, RatingForm, CheckoutForm
 from django.contrib import messages
 from django.db.models import Min, Max, Count, Avg
 from django.db.models import Q
+from django.contrib.auth.decorators import login_required
 
 
 # ---------------- Part 1 ----------------
@@ -42,6 +43,8 @@ def logout_view(request):
     messages.success(request, 'You have been logged out.')
     return redirect('shop:login')
 
+
+# ---------------- Part 2 ----------------
 
 def home(request):
     featured_products = Product.objects.filter(available=True).order_by('-created_at')[:8]
@@ -91,4 +94,26 @@ def product_detail(request, category_slug=None):
         'products': products,
         'min_price': min_price,
         'max_price': max_price,
+    })
+    
+
+def product_detail(request, slug):
+    product = get_object_or_404(Product, slug=slug, available=True)
+    related_products = Product.objects.filter(category=product.category).exclude(id=product.id)
+    user_rating = None
+    
+    if request.user.is_authenticated: 
+        try:
+            user_rating = Rating.objects.get(user=request.user, product=product)
+        except Rating.DoesNotExist:
+            #user_rating = None
+            pass
+    
+    rating_form = RatingForm(instance=user_rating) #or None
+    
+    return render(request, 'shop/product_detail.html', {
+        'product': product,
+        'related_products': related_products,
+        'rating_form': rating_form,
+        'user_rating': user_rating,
     })
