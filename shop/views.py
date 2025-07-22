@@ -5,7 +5,7 @@ from .models import Product, Category, Cart, Order, CartItem, OrderItem, Rating
 from .forms import RegistrationForm, RatingForm, CheckoutForm
 from django.contrib import messages
 from django.db.models import Min, Max, Count, Avg
-form django.db.models import Q
+from django.db.models import Q
 
 
 # ---------------- Part 1 ----------------
