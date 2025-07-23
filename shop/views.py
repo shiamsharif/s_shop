@@ -7,7 +7,8 @@ from django.contrib import messages
 from django.db.models import Min, Max, Count, Avg
 from django.db.models import Q
 from django.contrib.auth.decorators import login_required
-
+from .utils import generate_sslcommerz_payment
+from django.views.decorators.csrf import csrf_exempt
 
 # ---------------- Part 1 ----------------
 def login_view(request):
@@ -222,3 +223,21 @@ def checkout(request):
         'form': form,
         'cart': cart
         })
+    
+@csrf_exempt   
+@login_required
+def payment_success(request):
+    order_id = request.session.get('cart_id')
+    if not order_id:
+        messages.error(request, 'No order found.')
+        return redirect('shop:cart_detail')
+    
+    order = get_object_or_404(Order, id=order_id)
+    payment_data = generate_sslcommerz_payment(order, request)
+    
+    if payment_data['status'] == 'success':
+        messages.success(request, 'Payment successful!')
+        return redirect(payment_data['GatewayPageURL'])
+    else:
+        messages.error(request, 'Payment failed. Please try again.')
+        return redirect('shop:cart_detail')
