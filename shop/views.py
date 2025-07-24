@@ -7,7 +7,7 @@ from django.contrib import messages
 from django.db.models import Min, Max, Count, Avg
 from django.db.models import Q
 from django.contrib.auth.decorators import login_required
-from .utils import generate_sslcommerz_payment
+from .utils import generate_sslcommerz_payment, send_order_confirmation_email
 from django.views.decorators.csrf import csrf_exempt
 
 # ---------------- Part 1 ----------------
@@ -226,7 +226,7 @@ def checkout(request):
     
 @csrf_exempt   
 @login_required
-def payment_success(request):
+def payment_process(request):
     order_id = request.session.get('cart_id')
     if not order_id:
         messages.error(request, 'No order found.')
@@ -241,3 +241,46 @@ def payment_success(request):
     else:
         messages.error(request, 'Payment failed. Please try again.')
         return redirect('shop:cart_detail')
+    
+    
+@csrf_exempt   
+@login_required
+def payment_success(request, order_id):
+    order = get_object_or_404(Order, id=order_id, user=request.user)
+    order.paid = True
+    order.status = 'processing'
+    order.transaction_id = order.id
+    order.save()
+
+    order_items = Order.objects.all()
+    for item in order_items:
+        product = item.product
+        product.stock -= item.quantity
+        if product.stock < 0:
+            product.stock = 0
+        product.save()
+        
+    send_order_confirmation_email(order)
+
+    messages.success(request, 'Payment was successful. Thank you for your purchase!')
+    return redirect('shop:order_success')
+
+
+@csrf_exempt   
+@login_required
+def payment_fail(request, order_id):
+    order = get_object_or_404(Order, id=order_id, user=request.user)
+    order.status = 'cancelled'
+    order.save()
+    messages.error(request, 'Payment failed. Please try again.')
+    return redirect('shop:cart_detail')
+
+
+@csrf_exempt   
+@login_required
+def payment_cancel(request, order_id):
+    order = get_object_or_404(Order, id=order_id, user=request.user)
+    order.status = 'cancelled'
+    order.save()
+    messages.error(request, 'Payment was cancelled.')
+    return redirect('shop:cart_detail')

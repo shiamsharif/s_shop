@@ -1,6 +1,8 @@
 import json
 import requests
 from django.conf import settings
+from django .template.loader import render_to_string
+from django.core.mail import EmailMultiAlternatives
 
 
 def generate_sslcommerz_payment(order, request):
@@ -25,3 +27,21 @@ def generate_sslcommerz_payment(order, request):
         'product_category': 'General',
         'product_profile': 'general',
     }
+    
+    response = requests.post(settings.SSLCOMMERZ_API_URL, data=post_Data)
+    return json.loads(response.text)
+
+
+def send_order_confirmation_email(order):
+    subject = f"Order Confirmation - Order #{order.id}"
+    message = render_to_string('shop/order_confirmation_email.html', {
+        'order': order,
+    })
+    to = order.email
+    send_mail = EmailMultiAlternatives(subject, '', to=[to])
+    send_mail.attach_alternative(message, "text/html")
+    send_mail.send()
+    
+    
+    
+   
