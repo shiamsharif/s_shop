@@ -284,3 +284,22 @@ def payment_cancel(request, order_id):
     order.save()
     messages.error(request, 'Payment was cancelled.')
     return redirect('shop:cart_detail')
+
+
+@login_required
+def profile(request):
+    tab = request.GET.get('tab')
+    orders = Order.objects.filter(user=request.user).order_by('-created_at')
+    completed_orders = orders.filter(status='delivered').count()
+    total_spent = sum(order.get_total_cost() for order in orders)
+    order_history_active = (tab == 'orders')
+    
+    return render(request, 'shop/profile.html', {
+        'orders': orders,
+        'completed_orders': completed_orders,
+        'total_spent': total_spent,
+        'order_history_active': order_history_active,
+        'user': request.user,
+    })
+    
+    
