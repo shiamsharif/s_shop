@@ -302,4 +302,39 @@ def profile(request):
         'user': request.user,
     })
     
+
+@login_required
+def rate_product(request, product_id):
+    product = get_object_or_404(Product, id=product_id)
+    ordered_items = OrderItem.objects.filter(
+        order__user = request.user,
+        order_paid = True,
+        product=product
+    )
     
+    if not ordered_items.exists():
+        messages.error(request, 'You can only rate products you have purchased.')
+        return redirect('shop:product_detail')
+    
+    try:
+        rating = Rating.objects.get(user=request.user, product=product)
+    except Rating.DoesNotExist:
+        rating = None
+        
+    if request.method == 'POST':
+        form = RatingForm(request.POST, instance=rating)
+        if form.is_valid():
+            rating = form.save(commit=False)
+            rating.user = request.user
+            rating.product = product
+            rating.save()
+            messages.success(request, 'Your rating has been submitted.')
+            return redirect('shop:product_detail', slug=product.slug)
+    else:
+        form = RatingForm(instance=rating)
+            
+    return render(request, 'shop/rate_product.html', {
+        'form': form,
+        'product': product,
+        #'rating': rating,
+    })
