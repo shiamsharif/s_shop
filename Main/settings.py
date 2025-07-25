@@ -169,7 +169,7 @@ ACCOUNT_LOGIN_ON_EMAIL_CONFIRMATION = True
 
 LOGOUT_REDIRECT_URL = '/'
 LOGIN_REDIRECT_URL = '/'
-LOGIN_URL = '/accounts/login/'
+LOGIN_URL = '/login/'
 
 # For Email
 EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
