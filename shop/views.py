@@ -86,7 +86,7 @@ def product_list(request, category_slug=None):
         products = Product.objects.filter(
             Q(name__icontains=query) |
             Q(description__icontains=query) |
-            Q(category__icontains=query)
+            Q(category__name__icontains=query)
         )
         
     return render(request, 'shop/product_list.html', {
