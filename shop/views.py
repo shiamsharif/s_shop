@@ -120,7 +120,7 @@ def product_detail(request, slug):
     })
     
     
-@login_required
+@login_required(login_url='/login/')
 def cart(request):
     try:
         cart = Cart.objects.get(user=request.user)
@@ -130,7 +130,7 @@ def cart(request):
     return render(request, 'shop/cart.html', {'cart': cart})
 
 
-@login_required
+@login_required(login_url='/login/')
 def cart_add(request,product_id):
     product = get_object_or_404(Product, id=product_id)
     
@@ -150,7 +150,7 @@ def cart_add(request,product_id):
     return redirect('shop:product_detail', slug=product.slug)
 
 
-@login_required
+@login_required(login_url='/login/')
 def cart_remove(request, product_id):
     cart = get_object_or_404(Cart, user=request.user)
     product = get_object_or_404(Product, id=product_id)
@@ -160,30 +160,30 @@ def cart_remove(request, product_id):
     return redirect('shop:cart')
 
 
-@login_required
+@login_required(login_url='/login/')
 def cart_update(request, product_id):
     cart = get_object_or_404(Cart, user=request.user)
     product = get_object_or_404(Product, id=product_id)
     cart_item = get_object_or_404(CartItem, cart=cart, product=product)
     
-    quentity = int(request.POST.get('quantity', 1))
+    quantity = int(request.POST.get('quantity', 1))
     
-    if quentity > 0:
-        cart_item.quantity = quentity
+    if quantity > 0:
+        cart_item.quantity = quantity
         cart_item.save()
         messages.success(request, f'Quantity of {product.name} has been updated.')
     else:
-        cart_item.quantity = quentity
+        cart_item.quantity = quantity
         cart_item.save()
         messages.error(request, 'Cart update successfully!')
 
     return redirect('shop:cart')
 
 @csrf_exempt  
-@login_required
+@login_required(login_url='/login/')
 def checkout(request):
     try:
-        cart = Cart.objsects.get(user=request.user)
+        cart = Cart.objects.get(user=request.user)
         if not cart.items.exists():
             messages.error(request, 'Your cart is empty.')
             return redirect('shop:cart')
@@ -225,7 +225,7 @@ def checkout(request):
         })
     
 @csrf_exempt   
-@login_required
+@login_required(login_url='/login/')
 def payment_process(request):
     order_id = request.session.get('cart_id')
     if not order_id:
@@ -244,7 +244,7 @@ def payment_process(request):
     
     
 @csrf_exempt   
-@login_required
+@login_required(login_url='/login/')
 def payment_success(request, order_id):
     order = get_object_or_404(Order, id=order_id, user=request.user)
     order.paid = True
@@ -252,7 +252,7 @@ def payment_success(request, order_id):
     order.transaction_id = order.id
     order.save()
 
-    order_items = Order.objects.all()
+    order_items = order.objects.all()
     for item in order_items:
         product = item.product
         product.stock -= item.quantity
@@ -267,7 +267,7 @@ def payment_success(request, order_id):
 
 
 @csrf_exempt   
-@login_required
+@login_required(login_url='/login/')
 def payment_fail(request, order_id):
     order = get_object_or_404(Order, id=order_id, user=request.user)
     order.status = 'cancelled'
@@ -277,7 +277,7 @@ def payment_fail(request, order_id):
 
 
 @csrf_exempt   
-@login_required
+@login_required(login_url='/login/')
 def payment_cancel(request, order_id):
     order = get_object_or_404(Order, id=order_id, user=request.user)
     order.status = 'cancelled'
@@ -286,7 +286,7 @@ def payment_cancel(request, order_id):
     return redirect('shop:cart')
 
 
-@login_required
+@login_required(login_url='/login/')
 def profile(request):
     tab = request.GET.get('tab')
     orders = Order.objects.filter(user=request.user).order_by('-created_at')
@@ -303,12 +303,12 @@ def profile(request):
     })
     
 
-@login_required
+@login_required(login_url='/login/')
 def rate_product(request, product_id):
     product = get_object_or_404(Product, id=product_id)
     ordered_items = OrderItem.objects.filter(
         order__user = request.user,
-        order_paid = True,
+        order_paid=True,
         product=product
     )
     
