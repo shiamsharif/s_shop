@@ -18,7 +18,7 @@ def login_view(request):
         user = authenticate(request, username=username, password=password)
         if user is not None:
             login(request, user)
-            return redirect('shop:register')
+            return redirect('shop:profile')
         else:
             messages.error(request, 'Invalid username or password.')
     return render(request, 'shop/login.html')
@@ -31,7 +31,7 @@ def register_view(request):
             user = form.save()
             login(request, user)
             messages.success(request, 'Registration successful. You are now logged in.')    
-            return redirect('shop:login')
+            return redirect('shop:profile')
         else:
             print(form.errors)  # 🔍 ফর্ম ভুল হলে সেটা কনসোলে দেখতে পারবেন
     else:
@@ -179,7 +179,7 @@ def cart_update(request, product_id):
 
     return redirect('shop:cart')
 
-
+@csrf_exempt  
 @login_required
 def checkout(request):
     try:
@@ -263,7 +263,7 @@ def payment_success(request, order_id):
     send_order_confirmation_email(order)
 
     messages.success(request, 'Payment was successful. Thank you for your purchase!')
-    return redirect('shop:profile')
+    return render(request, 'shop/payment_success.html', {'order':order})
 
 
 @csrf_exempt   
